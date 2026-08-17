@@ -20,7 +20,7 @@ namespace Chess.UI
         public void UpdateTurnText(int turnCount)
         {
             turnText.gameObject.SetActive(true);
-            turnText.text = turnCount + "手目　";
+            turnText.text = turnCount + "Turn";
         }
 
         // チェックテキスト表示

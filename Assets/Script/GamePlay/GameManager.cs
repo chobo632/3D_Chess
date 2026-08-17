@@ -1,8 +1,10 @@
-using System;
-using System.Collections.Generic;
-using UnityEngine;
 using Chess.Core;
 using Chess.Rules;
+using Chess.Scene;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Chess.GamePlay
 {
@@ -46,6 +48,12 @@ namespace Chess.GamePlay
 
         // ゲームモード
         private GameModeBase gameModeBase;
+
+        // 対戦相手AI
+        private AIPlayer aiPlayer;
+        private PieceColor aiColor;
+        // AI駒移動の間
+        private const float AIMoveDelay = 0.8f;
 
         // 
         private void Awake()
@@ -187,6 +195,9 @@ namespace Chess.GamePlay
             {
                 NotifyLotteryUpdate(lotteryCoordinator.Lottery(randomMode, currentTurn));
             }
+
+            // AIのターンなら自動で手を選んで実行
+            StartCoroutine(TryAIMoveWithDelay());
         }
         
         // 再抽選
@@ -258,6 +269,63 @@ namespace Chess.GamePlay
         {
             List<PieceModel> pieces = board.GetPieces(color);
             return pieces.Count == 1 && pieces[0].PieceType == PieceType.King;
+        }
+
+        // AIの色
+        public void SetAIColor()
+        {
+            if (SceneController.Instance.playerCount != PlayerCount.SoloPlay)
+            {
+                return;
+            }
+
+            // プレイヤーが白ならAIは黒（その逆も同様）
+            bool isPlayerWhite = cointossService.IsPlayerWhite();
+            aiColor = isPlayerWhite ? PieceColor.Black : PieceColor.White;
+            aiPlayer = new AIPlayer(aiColor, gameModeBase, board);
+
+            // プレイヤーの色をカメラに伝えて視点を固定
+            var playerColor = isPlayerWhite ? PieceColor.White : PieceColor.Black;
+            cameraController?.SetPlayerColor(playerColor);
+        }
+
+        // AI実行
+
+        private IEnumerator TryAIMoveWithDelay()
+        {
+            if (aiPlayer == null) yield break;
+            if (currentTurn != aiColor) yield break;
+
+            yield return new WaitForSeconds(AIMoveDelay);
+
+            // ポーズ中や操作不可状態なら待機
+            while (IsPaused || IsPromotion)
+            {
+                yield return null;
+            }
+
+            var result = aiPlayer.SelectMove();
+            if (result == null) yield break;
+
+            var (piece, pos) = result.Value;
+            MoveRequest(piece, pos);
+        }
+
+        // ゲーム開始時にAIが先行なら実行（外部から呼ぶ用）
+        public void TryAIMoveStart()
+        {
+            if (aiPlayer == null) return;
+            if (currentTurn != aiColor) return;
+
+            StartCoroutine(TryAIMoveWithDelay());
+        }
+
+        // AIの駒かどうかを判定
+        public bool IsAIPiece(PieceModel piece)
+        {
+            if (SceneController.Instance.playerCount != PlayerCount.SoloPlay) return false;
+            if (aiPlayer == null) return false;
+            return piece.PieceColor == aiColor;
         }
     }
 }

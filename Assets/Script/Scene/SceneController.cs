@@ -8,8 +8,12 @@ namespace Chess.Scene
     {
         // インスタンス化
         public static SceneController Instance;
+        // プレイ人数の選択表示
+        public PlayerCount playerCount;
         // ゲームモード選択表示
         public GameMode selectMode;
+        // 2人プレイ時視点選択
+        public CameraMode cameraMode;
         // 勝敗表示
         public GameResult gameResult;
 

@@ -57,6 +57,11 @@ namespace Chess.Scene
             // ターンテキスト初期表示
             GameUIManager.Instance.UpdateTurnText(GameManager.Instance.turnCount);
 
+            // コイントス結果からAIの色を決定
+            GameManager.Instance.SetAIColor();
+            // AIが先行（白）なら最初の手を実行
+            GameManager.Instance.TryAIMoveStart();
+
             // RandomMode時は初回抽選
             if (GameManager.Instance.IsRandomModeActive())
             {

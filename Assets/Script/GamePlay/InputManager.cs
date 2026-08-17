@@ -67,6 +67,12 @@ namespace Chess.GamePlay
                 return;
             }
 
+            // AIの駒は選択不可
+            if (GameManager.Instance.IsAIPiece(piece))
+            {
+                return;
+            }
+
             // 抽選された駒のみ選択可能
             if (!GameManager.Instance.IsLotteryPiece(piece))
             {

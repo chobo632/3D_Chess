@@ -6,16 +6,18 @@ namespace Chess.Scene
 {
     public class TitleScene : MonoBehaviour
     {
-        [SerializeField] CanvasGroup titlePanel;
-        [SerializeField] CanvasGroup modePanel;
+        [SerializeField] private CanvasGroup titlePanel;
+        [SerializeField] private CanvasGroup playerCountPanel;
+        [SerializeField] private CanvasGroup modePanel;
+        [SerializeField] private CanvasGroup cameraModePanel;
         // Modeパネル表示時に背景を暗くする
-        [SerializeField] Image titleImage;
+        [SerializeField] private Image titleImage;
 
-        // Mode選択画面に移行
+        // 人数選択画面に移行
         public void OnClickMode()
         {
             titleImage.color = new Color(1, 1, 1, 0.3f);
-            ShowPanel(modePanel);
+            ShowPanel(playerCountPanel);
         }
         // Exitボタン
         public void OnClickExit()
@@ -23,23 +25,75 @@ namespace Chess.Scene
             Application.Quit();
         }
 
-        // NormalModeのGameSceneに移行
-        public void OnClickNormal()
+        // Mode選択画面に移行
+        public void OnClickSoloPlayer()
         {
-            SceneController.Instance.selectMode = GameMode.Normal;
-            SceneController.Instance.ChangeScene("GameScene");
+            SceneController.Instance.playerCount = PlayerCount.SoloPlay;
+            ShowPanel(modePanel);
         }
-        // RandomModeのGameSceneに移行
-        public void OnClickRandom()
+        // Mode選択画面に移行
+        public void OnClickDuoPlayer()
         {
-            SceneController.Instance.selectMode = GameMode.Random;
-            SceneController.Instance.ChangeScene("GameScene");
+            SceneController.Instance.playerCount = PlayerCount.DuoPlay;
+            ShowPanel(modePanel);
         }
-        // Mode選択画面からTitle画面に戻る
-        public void OnClickBack()
+        // 人数選択画面からTitle画面に戻る
+        public void OnClickBackToTitle()
         {
             titleImage.color = new Color(1, 1, 1, 1f);
             ShowPanel(titlePanel);
+        }
+
+        // NormalModeのGameSceneに移行or視点選択画面に移行
+        public void OnClickNormal()
+        {
+            SceneController.Instance.selectMode = GameMode.Normal;
+            // DuoPlayでゲームモード選択後に視点選択へ
+            if (SceneController.Instance.playerCount == PlayerCount.DuoPlay)
+            {
+                ShowPanel(cameraModePanel);  // DuoPlayなら視点選択へ
+            }
+            else
+            {
+                SceneController.Instance.ChangeScene("GameScene");  // SoloPlayはそのまま
+            }
+        }
+        // RandomModeのGameSceneに移行or視点選択画面に移行
+        public void OnClickRandom()
+        {
+            SceneController.Instance.selectMode = GameMode.Random;
+            // DuoPlayでゲームモード選択後に視点選択へ
+            if (SceneController.Instance.playerCount == PlayerCount.DuoPlay)
+            {
+                ShowPanel(cameraModePanel);
+            }
+            else
+            {
+                SceneController.Instance.ChangeScene("GameScene");  // SoloPlayはそのまま
+            }
+        }
+        // Mode選択画面から人数選択画面に戻る
+        public void OnClickBackToPlayerCount()
+        {
+            ShowPanel(playerCountPanel);
+        }
+ 
+        // 自動支店切り替え選択後GameSceneに移行
+        public void OnClickAutoSwitch()
+        {
+            SceneController.Instance.cameraMode = CameraMode.AutoSwitch;
+            SceneController.Instance.ChangeScene("GameScene");
+        }
+        // 俯瞰視点固定選択後GameSceneに移行
+        public void OnClickOverhead()
+        {
+            SceneController.Instance.cameraMode = CameraMode.Overhead;
+            SceneController.Instance.ChangeScene("GameScene");
+        }
+        // 視点選択からゲームモード選択に戻る
+        public void OnClickBackToGameMode()
+        {
+            ShowPanel(modePanel);
         }
 
         // パネル切り替え共通処理
@@ -50,9 +104,17 @@ namespace Chess.Scene
             titlePanel.interactable = false;
             titlePanel.blocksRaycasts = false;
 
+            playerCountPanel.alpha = 0;
+            playerCountPanel.interactable = false;
+            playerCountPanel.blocksRaycasts = false;
+
             modePanel.alpha = 0;
             modePanel.interactable = false;
             modePanel.blocksRaycasts = false;
+
+            cameraModePanel.alpha = 0;
+            cameraModePanel.interactable = false;
+            cameraModePanel.blocksRaycasts = false;
 
             // 指定パネルだけ表示
             panel.alpha = 1;

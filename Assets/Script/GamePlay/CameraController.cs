@@ -1,5 +1,6 @@
 using UnityEngine;
 using Chess.Core;
+using Chess.Scene;
 
 namespace Chess.GamePlay
 {
@@ -15,16 +16,36 @@ namespace Chess.GamePlay
         [SerializeField] private Vector3 overheadRotation = new Vector3(90f, 0f, 0f);
 
         private bool isOverhead = false;
+        // プレイヤーの色を保持
+        private PieceColor playerColor = PieceColor.White;
 
         // Start is called before the first frame update
         void Start()
         {
+            var playerCount = SceneController.Instance.playerCount;
+            var cameraMode = SceneController.Instance.cameraMode;
+
+            if (playerCount == PlayerCount.DuoPlay && cameraMode == CameraMode.Overhead)
+            {
+                // 最初から俯瞰にして変更不可
+                ApplyView(overheadPosition, overheadRotation);
+                isOverhead = true;
+                return;
+            }
+
+            // 白視点で開始(Soloはプレイヤーの色で上書き)
             SetWhiteView();
         }
 
         // Update is called once per frame
         void Update()
         {
+            // DuoPlay俯瞰固定の場合はFキー無効
+            if (SceneController.Instance.playerCount == PlayerCount.DuoPlay && SceneController.Instance.cameraMode == CameraMode.Overhead)
+            {
+                return;
+            }
+
             // Fキーで俯瞰トグル
             if (Input.GetKeyDown(KeyCode.F))
             {
@@ -36,22 +57,62 @@ namespace Chess.GamePlay
                 }
                 else
                 {
-                    // 俯瞰解除時は現在のターン視点に戻す
-                    SetViewByTurn(GameManager.Instance.currentTurn);
+                    RestoreView();
                 }
+            }
+        }
+
+        // コイントス後にプレイヤーの色を設定して視点固定
+        public void SetPlayerColor(PieceColor color)
+        {
+            playerColor = color;
+            if (!isOverhead)
+            {
+                ApplyColorView(color);
             }
         }
 
         // ターン切り替え時にGameManagerから呼ぶ
         public void SetViewByTurn(PieceColor turn)
-        {
+        {   
             // 俯瞰中はターン切り替えでカメラを動かさない
+
+            if (SceneController.Instance.playerCount == PlayerCount.DuoPlay && SceneController.Instance.cameraMode == CameraMode.Overhead)
+            {
+                return;
+            }
+
+            if (SceneController.Instance.playerCount == PlayerCount.SoloPlay)
+            {
+                return;
+            }
+  
             if (isOverhead)
             {
                 return;
             }
 
-            if (turn == PieceColor.White)
+            ApplyColorView(turn);
+        }
+
+        // 俯瞰解除時に適切な視点に戻す
+        private void RestoreView()
+        {
+            if (SceneController.Instance.playerCount == PlayerCount.SoloPlay)
+            {
+                // SoloPlay：プレイヤーの色の視点に戻す
+                ApplyColorView(playerColor);
+            }
+            else
+            {
+                // DuoPlay自動切り替え：現在のターンの視点に戻す
+                ApplyColorView(GameManager.Instance.currentTurn);
+            }
+        }
+
+        private void ApplyColorView(PieceColor color)
+        {
+            if (color == PieceColor.White)
             {
                 SetWhiteView();
             }

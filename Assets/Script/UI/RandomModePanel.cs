@@ -29,7 +29,7 @@ namespace Chess.UI
         // 残り再抽選回数更新
         public void UpdateRerollText(int count)
         {
-            rerollText.text = "残り" + count + "回";
+            rerollText.text =  count + "";
         }
 
         // RandomModeパネル表示
