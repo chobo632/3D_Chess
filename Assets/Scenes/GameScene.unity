@@ -670,6 +670,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Chess_Board
       objectReference: {fileID: 0}
+    - target: {fileID: 5690447354237735969, guid: bd6d1cccbf1560a4cb184b81011aa23e, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 4197785855353820177, guid: bd6d1cccbf1560a4cb184b81011aa23e, type: 3}
     m_RemovedGameObjects: []
@@ -2897,7 +2901,7 @@ MonoBehaviour:
   whiteRotation: {x: 50, y: 180, z: 0}
   blackPosition: {x: 0.1, y: 1.5, z: -1.3}
   blackRotation: {x: 50, y: 0, z: 0}
-  overheadPosition: {x: 0.07, y: 2.1, z: 0}
+  overheadPosition: {x: 0.07, y: 2.3, z: 0}
   overheadRotation: {x: 90, y: 180, z: 0}
 --- !u!1 &1252224900
 GameObject:
@@ -3531,6 +3535,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   board: {fileID: 1535661451}
+  boardLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!4 &1498729007
 Transform:
   m_ObjectHideFlags: 0

@@ -7,6 +7,7 @@ namespace Chess.GamePlay
     public class InputManager : MonoBehaviour
     {
         [SerializeField] BoardModel board;
+        [SerializeField] private LayerMask boardLayerMask;
 
         private PieceModel selectPiece;
         private PieceView selectPieceController;
@@ -29,7 +30,7 @@ namespace Chess.GamePlay
             {
                 var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-                if (Physics.Raycast(ray, out RaycastHit hit))
+                if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, boardLayerMask))
                 {
                     var boardPos = board.GetBoardPosition(hit.point);
                     // ‹î‚ª‘I‘ð‚³‚ê‚½‚©

@@ -13,7 +13,8 @@ namespace Chess.GamePlay
         [SerializeField] private Vector3 blackRotation = new Vector3(50f, 0f, 0f);
         // 俯瞰視点設定
         [SerializeField] private Vector3 overheadPosition = new Vector3(0f, 2.5f, 0f);
-        [SerializeField] private Vector3 overheadRotation = new Vector3(90f, 0f, 0f);
+        [SerializeField] private Vector3 overheadRotationWhite = new Vector3(90f, 180f, 0f); // 白が手前
+        [SerializeField] private Vector3 overheadRotationBlack = new Vector3(90f, 0f, 0f);   // 黒が手前
 
         private bool isOverhead = false;
         // プレイヤーの色を保持
@@ -28,7 +29,7 @@ namespace Chess.GamePlay
             if (playerCount == PlayerCount.DuoPlay && cameraMode == CameraMode.Overhead)
             {
                 // 最初から俯瞰にして変更不可
-                ApplyView(overheadPosition, overheadRotation);
+                ApplyOverheadView();
                 isOverhead = true;
                 return;
             }
@@ -53,7 +54,7 @@ namespace Chess.GamePlay
 
                 if (isOverhead)
                 {
-                    ApplyView(overheadPosition, overheadRotation);
+                    ApplyOverheadView();
                 }
                 else
                 {
@@ -69,6 +70,21 @@ namespace Chess.GamePlay
             if (!isOverhead)
             {
                 ApplyColorView(color);
+            }
+        }
+
+        // 
+        private void ApplyOverheadView()
+        {
+            if (SceneController.Instance.playerCount == PlayerCount.SoloPlay)
+            {
+                // プレイヤーの色に応じて俯瞰の向きを変える
+                var rotation = playerColor == PieceColor.White ? overheadRotationWhite : overheadRotationBlack;
+                ApplyView(overheadPosition, rotation);
+            }
+            else
+            {
+                ApplyView(overheadPosition, overheadRotationWhite);
             }
         }
 

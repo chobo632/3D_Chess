@@ -27,6 +27,12 @@ namespace Chess.GamePlay
 
             foreach (var piece in pieces)
             {
+                // RandomModeの場合は抽選された駒のみ対象
+                if (gameModeBase is RandomMode randomMode)
+                {
+                    if (!randomMode.IsSelected(piece)) continue;
+                }
+
                 var legalMoves = gameModeBase.GetLegalMoves(piece, board.Model, board);
 
                 foreach (var move in legalMoves)
