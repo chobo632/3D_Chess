@@ -72,6 +72,20 @@ namespace Chess.Scene
                 SceneController.Instance.ChangeScene("GameScene");  // SoloPlayはそのまま
             }
         }
+        // BattleModeのGameSceneに移行or視点選択画面に移行
+        public void OnClickBattle()
+        {
+            SceneController.Instance.selectMode = GameMode.Battle;
+            // DuoPlayでゲームモード選択後に視点選択へ
+            if (SceneController.Instance.playerCount == PlayerCount.DuoPlay)
+            {
+                ShowPanel(cameraModePanel);
+            }
+            else
+            {
+                SceneController.Instance.ChangeScene("GameScene");  // SoloPlayはそのまま
+            }
+        }
         // Mode選択画面から人数選択画面に戻る
         public void OnClickBackToPlayerCount()
         {

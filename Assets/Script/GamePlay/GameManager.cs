@@ -81,7 +81,7 @@ namespace Chess.GamePlay
                     gameModeBase = new RandomMode();
                     break;
                 case GameMode.Battle:
-
+                    gameModeBase = new BattleMode();
                     break;
                 case GameMode.Custom:
 
@@ -91,6 +91,20 @@ namespace Chess.GamePlay
             // モード変更後に再生成
             moveExecutor = new MoveExecutor(board);
             lotteryCoordinator = new LotteryCoordinator(board);
+
+            // BattleModeなら全駒のステータスを登録
+            if (gameModeBase is BattleMode battleMode)
+            {
+                foreach (var piece in board.GetPieces(PieceColor.White))
+                {
+                    battleMode.RegisterPiece(piece); 
+                }
+
+                foreach (var piece in board.GetPieces(PieceColor.Black))
+                {
+                    battleMode.RegisterPiece(piece);
+                }
+            }
         }
 
         // Playerのコイントス選択を保存
@@ -116,20 +130,69 @@ namespace Chess.GamePlay
                 return;
             }
 
-            moveExecutor.ExecuteMove(piece, pos, gameModeBase);
-
-            if (JudgementPromotion(piece))
+            if (gameModeBase is BattleMode battleMode)
             {
-                return;
+                ExecuteBattleMove(piece, pos, battleMode);
             }
-
-            EndTurn();
+            else
+            {
+                moveExecutor.ExecuteMove(piece, pos, gameModeBase);
+                if (JudgementPromotion(piece)) return;
+                EndTurn();
+            }
         }
 
         // 手番判定
         private bool CanMove(PieceModel piece)
         {
             return piece.PieceColor == currentTurn;
+        }
+
+        // BattleMode専用の移動処理
+        private void ExecuteBattleMove(PieceModel piece, Vector2Int pos, BattleMode battleMode)
+        {
+            var target = board.GetPiece(pos);
+
+            if (target == null)
+            {
+                // 空マスへの通常移動
+                board.ExecuteMove(piece, pos);
+
+                // Queen範囲攻撃
+                if (piece.PieceType == PieceType.Queen)
+                {
+                    battleMode.QueenSplash(piece, board.Model, board);
+                }
+            }
+            else
+            {
+                // 敵駒への攻撃
+                bool defeated = battleMode.Attack(piece, target, board.Model, board);
+
+                if (defeated)
+                {
+                    // 撃破成功：敵を除外して攻撃側が前進
+                    battleMode.RemovePiece(target, board, board.Model);
+                    board.ExecuteMove(piece, pos);
+
+                    // Queen範囲攻撃
+                    if (piece.PieceType == PieceType.Queen)
+                    {
+                        battleMode.QueenSplash(piece, board.Model, board);
+                    }
+
+                    // TODO フェーズ2：Knight再行動
+                }
+                // 撃破失敗：攻撃側は元の位置のまま（移動なし）
+            }
+
+            // BattleMode勝利判定
+            if (CheckBattleGameEnd(battleMode)) return;
+
+            // プロモーション判定（Pawnのみ）
+            if (JudgementPromotion(piece)) return;
+
+            EndTurn();
         }
 
         // プロモーション判定
@@ -158,7 +221,19 @@ namespace Chess.GamePlay
         public void ExecutePromotion(PieceModel piece, PieceType type)
         {
             moveExecutor.Promotion(piece, type);
-            IsPromotion = false;
+
+            // BattleModeならプロモーション後の駒をステータス登録（HP - 20）
+            if (gameModeBase is BattleMode battleMode)
+            {
+                var newPiece = board.GetPiece(board.Model.GetPosition(piece));
+
+                if (newPiece != null)
+                {
+                    battleMode.RegisterPromotedPiece(newPiece);
+                }
+            }
+
+                IsPromotion = false;
             ChangeTurn();
             CheckGameEnd();
         }
@@ -188,6 +263,12 @@ namespace Chess.GamePlay
             }
 
             currentTurn = currentTurn == PieceColor.White ? PieceColor.Black : PieceColor.White;
+
+            // BattleModeのみ：ターン開始時にKing回復カウント更新
+            if (gameModeBase is BattleMode battleMode)
+            {
+                battleMode.UpdateKingRecovery(currentTurn, board.Model);
+            }
 
             cameraController?.SetViewByTurn(currentTurn);
             TurnChanged?.Invoke(turnCount);
@@ -270,6 +351,31 @@ namespace Chess.GamePlay
         {
             List<PieceModel> pieces = board.GetPieces(color);
             return pieces.Count == 1 && pieces[0].PieceType == PieceType.King;
+        }
+
+        // BattleMode勝利判定
+        private bool CheckBattleGameEnd(BattleMode battleMode)
+        {
+            // 50ターン経過で引き分け
+            if (turnCount >= 50)
+            {
+                GameEnd?.Invoke(GameResult.Draw);
+                return true;
+            }
+
+            // KingのHPが0以下になった側の負け
+            if (battleMode.IsKingDefeated(PieceColor.White, board.Model))
+            {
+                GameEnd?.Invoke(GameResult.BlackWin);
+                return true;
+            }
+            if (battleMode.IsKingDefeated(PieceColor.Black, board.Model))
+            {
+                GameEnd?.Invoke(GameResult.WhiteWin);
+                return true;
+            }
+
+            return false;
         }
 
         // AIの色
