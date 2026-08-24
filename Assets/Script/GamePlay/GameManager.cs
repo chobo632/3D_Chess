@@ -53,7 +53,8 @@ namespace Chess.GamePlay
         private AIPlayer aiPlayer;
         private PieceColor aiColor;
         // AI駒移動の間
-        private const float AIMoveDelay = 0.8f;
+        private const float AIThinkDelay = 0.8f;   // 考える時間
+        private const float AISelectDelay = 0.8f;  // 駒を選んでから動かすまでの時間
 
         // 
         private void Awake()
@@ -296,19 +297,39 @@ namespace Chess.GamePlay
             if (aiPlayer == null) yield break;
             if (currentTurn != aiColor) yield break;
 
-            yield return new WaitForSeconds(AIMoveDelay);
+            // 考える間
+            yield return WaitFor(AIThinkDelay);
 
-            // ポーズ中や操作不可状態なら待機
-            while (IsPaused || IsPromotion)
-            {
-                yield return null;
-            }
-
+            // 手を選ぶ
             var result = aiPlayer.SelectMove();
             if (result == null) yield break;
-
             var (piece, pos) = result.Value;
+
+            // 駒を選択して移動範囲を表示
+            var controller = board.GetController(piece);
+            var legalMoves = gameModeBase.GetLegalMoves(piece, board.Model, board);
+            controller.Lift(board.GetWorldPosition(board.Model.GetPosition(piece)), 0.3f);
+            board.ShowMoves(legalMoves);
+
+            // 3. 選んだ状態でまた待機
+            yield return WaitFor(AISelectDelay);
+
+            board.HideMoves();
             MoveRequest(piece, pos);
+        }
+
+        // ポーズ中は時間を止める待機
+        private IEnumerator WaitFor(float seconds)
+        {
+            float elapsed = 0f;
+            while (elapsed < seconds)
+            {
+                if (!IsPaused && !IsPromotion)
+                {
+                    elapsed += Time.deltaTime;
+                }
+                yield return null;
+            }
         }
 
         // ゲーム開始時にAIが先行なら実行（外部から呼ぶ用）
