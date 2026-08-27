@@ -14,6 +14,19 @@ namespace Chess.GamePlay
         private Color originalColor;
         private List<Vector2Int> currentLegalMoves = new();
 
+        private void Start()
+        {
+            GameManager.Instance.AttackFailed += OnAttackFailed;
+        }
+
+        private void OnDestroy()
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AttackFailed -= OnAttackFailed;
+            }
+        }
+
         // Update is called once per frame
         void Update()
         {
@@ -173,6 +186,21 @@ namespace Chess.GamePlay
             board.HideMoves();
             selectPiece = null;
             selectPieceController= null;
+            currentLegalMoves.Clear();
+        }
+
+        // åÇîjé∏îséûÇÃèàóù
+        private void OnAttackFailed(PieceModel piece)
+        {
+            if (selectPiece != piece) return;
+
+            // ïÇÇ¢ÇΩãÓÇå≥ÇÃà íuÇ…ñﬂÇ∑
+            selectPieceController.MoveTo(board.GetWorldPosition(board.Model.GetPosition(selectPiece)));
+            RestorePieceColor(selectPiece, selectPieceController);
+
+            board.HideMoves();
+            selectPiece = null;
+            selectPieceController = null;
             currentLegalMoves.Clear();
         }
     }

@@ -1,6 +1,7 @@
+using Chess.Core;
+using Chess.GamePlay;
 using System.Collections.Generic;
 using UnityEngine;
-using Chess.Core;
 
 namespace Chess.UI
 {
@@ -11,7 +12,7 @@ namespace Chess.UI
         [SerializeField] private PromotionPanel promotionPanel;
         [SerializeField] private RandomModePanel randomModePanel;
         [SerializeField] private GameStatusPanel gameStatusPanel;
-        
+
         public static GameUIManager Instance;
 
 

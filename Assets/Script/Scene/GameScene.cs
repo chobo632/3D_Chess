@@ -16,7 +16,7 @@ namespace Chess.Scene
 
         private void Start()
         {
-            // ã‚¤ãƒ™ãƒ³ãƒˆã«ç™»éŒ²
+            // ƒCƒxƒ“ƒg‚É“o˜^
             GameManager.Instance.TurnChanged += GameUIManager.Instance.UpdateTurnText;
             GameManager.Instance.CheckChanged += GameUIManager.Instance.ShowCheckText;
             GameManager.Instance.PromotionRequested += GameUIManager.Instance.ShowPromotion;
@@ -26,43 +26,43 @@ namespace Chess.Scene
             GameManager.Instance.LotteryPiecesUpdated += GameUIManager.Instance.ShowLotteryPieces;
             GameManager.Instance.RerollCountUpdated += GameUIManager.Instance.UpdateRerollText;
 
-            // GameManagerã«Modeã‚’ã‚»ãƒƒãƒˆ
+            // GameManager‚ÉMode‚ğƒZƒbƒg
             GameManager.Instance.SetMode(SceneController.Instance.selectMode);
 
-            // æœ€åˆã¯ãƒãƒ¼ã‚ºãƒ‘ãƒãƒ«ã‚’éè¡¨ç¤º
+            // Å‰‚Íƒ|[ƒYƒpƒlƒ‹‚ğ”ñ•\¦
             GameUIManager.Instance.ShowPause(false);
 
-            // ã‚³ã‚¤ãƒ³ãƒˆã‚¹é–‹å§‹
+            // ƒRƒCƒ“ƒgƒXŠJn
             StartCointoss();
         }
 
-        // RandomModeãƒ‘ãƒãƒ«è¡¨ç¤º
+        // RandomModeƒpƒlƒ‹•\¦
         private void OnRandomModeStarted()
         {
             GameUIManager.Instance.ShowRandomMode(true);
         }
 
-        // ã‚³ã‚¤ãƒ³ãƒˆã‚¹ç”»é¢ã‚’è¡¨ç¤ºã•ã›ã‚‹
+        // ƒRƒCƒ“ƒgƒX‰æ–Ê‚ğ•\¦‚³‚¹‚é
         private void StartCointoss()
         {
             GameManager.Instance.IsCointoss = true;
             GameUIManager.Instance.ShowCointoss(true);
         }
-        // ã‚³ã‚¤ãƒ³ãƒˆã‚¹ç”»é¢ã‚’éè¡¨ç¤ºã«ã™ã‚‹
+        // ƒRƒCƒ“ƒgƒX‰æ–Ê‚ğ”ñ•\¦‚É‚·‚é
         public void EndCointoss()
         {
             GameManager.Instance.IsCointoss = false;
             GameUIManager.Instance.ShowCointoss(false);
 
-            // ã‚¿ãƒ¼ãƒ³ãƒ†ã‚­ã‚¹ãƒˆåˆæœŸè¡¨ç¤º
+            // ƒ^[ƒ“ƒeƒLƒXƒg‰Šú•\¦
             GameUIManager.Instance.UpdateTurnText(GameManager.Instance.turnCount);
 
-            // ã‚³ã‚¤ãƒ³ãƒˆã‚¹çµæœã‹ã‚‰AIã®è‰²ã‚’æ±ºå®š
+            // ƒRƒCƒ“ƒgƒXŒ‹‰Ê‚©‚çAI‚ÌF‚ğŒˆ’è
             GameManager.Instance.SetAIColor();
-            // AIãŒå…ˆè¡Œï¼ˆç™½ï¼‰ãªã‚‰æœ€åˆã®æ‰‹ã‚’å®Ÿè¡Œ
+            // AI‚ªæsi”’j‚È‚çÅ‰‚Ìè‚ğÀs
             GameManager.Instance.TryAIMoveStart();
 
-            // RandomModeæ™‚ã¯åˆå›æŠ½é¸
+            // RandomMode‚Í‰‰ñ’Š‘I
             if (GameManager.Instance.IsRandomModeActive())
             {
                 GameManager.Instance.StartLottery();
@@ -71,7 +71,7 @@ namespace Chess.Scene
 
         private void Update()
         {
-            // Escã‹Pã§ãƒãƒ¼ã‚ºåˆ‡ã‚Šæ›¿ãˆ
+            // Esc‚©P‚Åƒ|[ƒYØ‚è‘Ö‚¦
             if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
             {
                 GameManager.Instance.IsPaused = !GameManager.Instance.IsPaused;
@@ -79,13 +79,13 @@ namespace Chess.Scene
             }
         }
 
-        // Resetãƒœã‚¿ãƒ³
+        // Resetƒ{ƒ^ƒ“
         public void OnClickReset()
         {
             SceneController.Instance.ChangeScene("GameScene");
         }
 
-        // Titleãƒœã‚¿ãƒ³
+        // Titleƒ{ƒ^ƒ“
         public void OnClickTitle()
         {
             SceneController.Instance.ChangeScene("TitleScene");
@@ -110,7 +110,7 @@ namespace Chess.Scene
         // 
         private void GameEnd(GameResult result)
         {
-            // ResultSceneã«ç§»è¡Œ
+            // ResultScene‚ÉˆÚs
             SceneController.Instance.gameResult = result;
             SceneController.Instance.ChangeScene("ResultScene");
         }

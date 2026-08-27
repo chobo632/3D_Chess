@@ -15,6 +15,7 @@ namespace Chess.GamePlay
         [SerializeField] private CameraController cameraController;
 
         public static GameManager Instance;
+        public Action<PieceModel> AttackFailed;
 
         // ターン・チェック・プロモーション・終了イベント
         public Action<int> TurnChanged;
@@ -95,15 +96,25 @@ namespace Chess.GamePlay
             // BattleModeなら全駒のステータスを登録
             if (gameModeBase is BattleMode battleMode)
             {
+                // 全駒登録
                 foreach (var piece in board.GetPieces(PieceColor.White))
                 {
-                    battleMode.RegisterPiece(piece); 
+                    battleMode.RegisterPiece(piece);
+                    var stats = battleMode.GetStats(piece);
+                    board.GetController(piece)?.UpdateHP(stats.CurrentHP, stats.MaxHP);
                 }
-
                 foreach (var piece in board.GetPieces(PieceColor.Black))
                 {
                     battleMode.RegisterPiece(piece);
+                    var stats = battleMode.GetStats(piece);
+                    board.GetController(piece)?.UpdateHP(stats.CurrentHP, stats.MaxHP);
                 }
+
+                // HP変化時に表示更新
+                battleMode.HPChanged += (piece, current, max) =>
+                {
+                    board.GetController(piece)?.UpdateHP(current, max);
+                };
             }
         }
 
@@ -171,7 +182,7 @@ namespace Chess.GamePlay
 
                 if (defeated)
                 {
-                    // 撃破成功：敵を除外して攻撃側が前進
+                    // 撃破成功時敵を除外して攻撃側が前進
                     battleMode.RemovePiece(target, board, board.Model);
                     board.ExecuteMove(piece, pos);
 
@@ -183,7 +194,11 @@ namespace Chess.GamePlay
 
                     // TODO フェーズ2：Knight再行動
                 }
-                // 撃破失敗：攻撃側は元の位置のまま（移動なし）
+                else
+                {
+                    // 撃破失敗時InputManagerに通知して駒を元の位置に戻させる
+                    AttackFailed?.Invoke(piece);
+                }
             }
 
             // BattleMode勝利判定
@@ -192,7 +207,7 @@ namespace Chess.GamePlay
             // プロモーション判定（Pawnのみ）
             if (JudgementPromotion(piece)) return;
 
-            EndTurn();
+            EndTurn();            
         }
 
         // プロモーション判定

@@ -1,9 +1,15 @@
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 namespace Chess.Core
 {
     public class PieceView : MonoBehaviour
     {
+        [SerializeField] private Slider hpBar;
+        [SerializeField] private TextMeshProUGUI hpText;
+        [SerializeField] private GameObject hpCanvas;
+
         private Renderer pieceRenderer;
         public  PieceModel Piece { get; private set; }
 
@@ -15,14 +21,14 @@ namespace Chess.Core
             pieceRenderer = GetComponentInChildren<Renderer>();
         }
 
-        // „Éá„Éº„Çø„Å®Á¥ê„Å•„Åë
+        // ÉfÅ[É^Ç∆ïRÇ√ÇØ
         public void Initialize(PieceModel piece)
         {
             Piece = piece;
             SetColor(piece.PieceColor);
         }
 
-        // Ëâ≤„ÅÆË®≠ÂÆö
+        // êFÇÃê›íË
         public void SetColor(PieceColor pieceColor)
         {
             if (pieceColor == PieceColor.White)
@@ -57,6 +63,28 @@ namespace Chess.Core
         public void Lift(Vector3 worldPosition, float height)
         {
             transform.position = worldPosition + new Vector3(0, height, 0);
+        }
+
+        // HPÇçXêV
+        public void UpdateHP(int currentHP, int maxHP)
+        {
+            if (hpCanvas == null) return;
+
+            hpCanvas.SetActive(true);
+            if (hpBar != null)
+            {
+                hpBar.value = (float)currentHP / maxHP;
+            }
+            if (hpText != null)
+            {
+                hpText.text = $"{currentHP}/{maxHP}";
+            }
+        }
+
+        // HPï\é¶ÇîÒï\é¶ÅiBattleModeà»äOópÅj
+        public void HideHP()
+        {
+            if (hpCanvas != null) hpCanvas.SetActive(false);
         }
     }
 }

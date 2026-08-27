@@ -1,3 +1,4 @@
+using Chess.GamePlay;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,14 +8,14 @@ namespace Chess.Core
     {
         [SerializeField] GameObject moveMarkerPrefab;
 
-        // å„é§’ã®ãƒ—ãƒ¬ãƒãƒ–
+        // Še‹î‚ÌƒvƒŒƒnƒu
         [SerializeField] private PieceView pawnPrefab;
         [SerializeField] private PieceView rookPrefab;
         [SerializeField] private PieceView knightPrefab;
         [SerializeField] private PieceView bishopPrefab;
         [SerializeField] private PieceView queenPrefab;
         [SerializeField] private PieceView kingPrefab;
-        // ãƒã‚¹åº§æ¨™ã€ãƒã‚¹ã‚µã‚¤ã‚º
+        // ƒ}ƒXÀ•WAƒ}ƒXƒTƒCƒY
         [SerializeField] private float cellSize = 0.239f;
         [SerializeField] private float boardReferencepos = 3.5f;
 
@@ -22,7 +23,7 @@ namespace Chess.Core
         private const int BoardSize_Y = 8;
         
         private readonly List<GameObject> moveMarkers = new();
-        // Pieceãƒ‡ãƒ¼ã‚¿ã¨PieceControllerã®å¯¾å¿œã‚’ç®¡ç†
+        // Pieceƒf[ƒ^‚ÆPieceController‚Ì‘Î‰‚ğŠÇ—
         private readonly Dictionary<PieceModel, PieceView> controllers = new();
 
         public CellModel Model { get; } = new CellModel();
@@ -55,7 +56,7 @@ namespace Chess.Core
         {
             var layout = BuildInitialLayout();
 
-            // é§’ã®ç”Ÿæˆ
+            // ‹î‚Ì¶¬
             for (int x = 0; x < BoardSize_X; x++)
             {
                 for (int y = 0; y < BoardSize_Y; y++)
@@ -72,12 +73,12 @@ namespace Chess.Core
         {
             var layout = new PieceData[BoardSize_X, BoardSize_Y];
 
-            // ç›¤ä¸Šå¾Œæ–¹ã®é§’æ•´åˆ—é †
+            // ”ÕãŒã•û‚Ì‹î®—ñ‡
             PieceType[] backRow =
             { PieceType.Rook,PieceType.Knight,PieceType.Bishop,PieceType.King,
               PieceType.Queen,PieceType.Bishop,PieceType.Knight,PieceType.Rook };
 
-            // é§’ã®é…ç½®
+            // ‹î‚Ì”z’u
             for (int x = 0; x < BoardSize_X; x++)
             {
                 layout[x, 6] = new PieceData
@@ -97,7 +98,7 @@ namespace Chess.Core
             return layout;
         }
 
-        // ç›¤åº§æ¨™å–å¾—
+        // ”ÕÀ•Wæ“¾
         public Vector3 GetWorldPosition(Vector2Int pos)
         {
             return transform.position + new Vector3((pos.x - boardReferencepos) * cellSize, 0.15f, (pos.y - boardReferencepos) * cellSize);
@@ -111,18 +112,18 @@ namespace Chess.Core
             return new Vector2Int((int)x, (int)y);
         }
 
-        // ç”Ÿæˆé–¢æ•°
+        // ¶¬ŠÖ”
         public void SpawnPiece(PieceType type, PieceColor color, Vector2Int pos)
         {
             var prefab = GetPrefab(type);
-            // ã‚«ãƒ¡ãƒ©ã®è¦–ç‚¹åˆ‡ã‚Šæ›¿ãˆèª¿æ•´
+            // ƒJƒƒ‰‚Ì‹“_Ø‚è‘Ö‚¦’²®
             var rotation = color == PieceColor.White ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
             var controller = Instantiate(prefab, GetWorldPosition(pos), rotation);
 
-            // Pieceãƒ‡ãƒ¼ã‚¿ã‚’ç”Ÿæˆã—ã¦Controllerã«æ¸¡ã™
+            // Pieceƒf[ƒ^‚ğ¶¬‚µ‚ÄController‚É“n‚·
             var piece = new PieceModel(type, color);
             controller.Initialize(piece);
-            
+
             Model.Place(piece, pos);
             RegisterController(piece, controller);
         }
@@ -151,24 +152,24 @@ namespace Chess.Core
             return prefab;
         }
 
-        // é§’ã®ç§»å‹•å®Ÿè¡Œ
+        // ‹î‚ÌˆÚ“®Às
         public void ExecuteMove(PieceModel piece, Vector2Int pos)
         {
             var captured = Model.MovePiece(piece, pos);
 
-            // å–ã£ãŸé§’å‰Šé™¤
+            // æ‚Á‚½‹îíœ
             if (captured != null)
             {
                 DestroyPieceController(captured);
             }
 
-            // è¦‹ãŸç›®æ›´æ–°
+            // Œ©‚½–ÚXV
             var controller  = GetController(piece);
             controller.MoveTo(GetWorldPosition(pos));
             controller.IsMoved = true;
         }
 
-        // é§’ã®å‰Šé™¤
+        // ‹î‚Ìíœ
         public void RemovePiece(Vector2Int pos)
         {
             var target = Model.GetPiece(pos);
@@ -188,7 +189,7 @@ namespace Chess.Core
             SpawnPiece (type, color, pos);
         }
 
-        // ç§»å‹•å¯èƒ½ãƒã‚¹ã®è‰²å¤‰æ›´
+        // ˆÚ“®‰Â”\ƒ}ƒX‚ÌF•ÏX
         public void ShowMoves(List<Vector2Int> moves)
         {
             foreach (var pos in moves)
@@ -198,7 +199,7 @@ namespace Chess.Core
             }
         }
 
-        // ãƒãƒ¼ã‚«ãƒ¼ã®å‰Šé™¤
+        // ƒ}[ƒJ[‚Ìíœ
         public void HideMoves()
         {
             foreach (var marker in moveMarkers)
@@ -221,7 +222,7 @@ namespace Chess.Core
             }
         }
 
-        // Modelã®èª­ã¿å–ã‚Šã‚’ä¸­ç¶™
+        // Model‚Ì“Ç‚İæ‚è‚ğ’†Œp
         public PieceModel GetPiece(Vector2Int pos)
         {
             return Model.GetPiece(pos);

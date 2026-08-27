@@ -1,17 +1,20 @@
+using Chess.Core;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Chess.Core;
 
 namespace Chess.Rules
 {
     public class BattleMode : GameModeBase
     {
-        // å„é§’ã®ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹
+        public Action<PieceModel, int, int> HPChanged;
+
+        // Še‹î‚ÌƒXƒe[ƒ^ƒX
         private readonly Dictionary<PieceModel, BattleStats> stats = new();
-        // Kingã®HPå›å¾©ã‚«ã‚¦ãƒ³ãƒˆï¼ˆè‡ªåˆ†ã®ã‚¿ãƒ¼ãƒ³åŸºæº–ã§ä½•ã‚¿ãƒ¼ãƒ³è¢«å¼¾ãªã—ã‹ï¼‰
+        // King‚ÌHP‰ñ•œƒJƒEƒ“ƒgi©•ª‚Ìƒ^[ƒ“Šî€‚Å‰½ƒ^[ƒ“”í’e‚È‚µ‚©j
         private readonly Dictionary<PieceModel, int> kingHealCounter = new();
 
-        // é§’ç™»éŒ²ï¼ˆã‚²ãƒ¼ãƒ é–‹å§‹æ™‚ãƒ»ãƒ—ãƒ­ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³æ™‚ã«å‘¼ã¶ï¼‰
+        // ‹î“o˜^iƒQ[ƒ€ŠJnEƒvƒƒ‚[ƒVƒ‡ƒ“‚ÉŒÄ‚Ôj
         public void RegisterPiece(PieceModel piece)
         {
             stats[piece] = BattleStats.CreateDefault(piece.PieceType);
@@ -22,7 +25,7 @@ namespace Chess.Rules
             }
         }
 
-        // ãƒ—ãƒ­ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³æ™‚ï¼šå¤‰åŒ–å¾Œã®HPã‹ã‚‰20å¼•ã„ãŸçŠ¶æ…‹ã§ã‚¹ã‚¿ãƒ¼ãƒˆ
+        // ƒvƒƒ‚[ƒVƒ‡ƒ“F•Ï‰»Œã‚ÌHP‚©‚ç20ˆø‚¢‚½ó‘Ô‚ÅƒXƒ^[ƒg
         public void RegisterPromotedPiece(PieceModel piece)
         {
             var defaultStats = BattleStats.CreateDefault(piece.PieceType);
@@ -36,7 +39,7 @@ namespace Chess.Rules
             return s;
         }
 
-        // é§’ã®å‰Šé™¤ï¼ˆã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚‚åŒæ™‚ã«å‰Šé™¤ï¼‰
+        // ‹î‚ÌíœiƒXƒe[ƒ^ƒX‚à“¯‚Éíœj
         public void RemovePiece(PieceModel piece, BoardModel boardModel, CellModel cellModel)
         {
             boardModel.RemovePiece(cellModel.GetPosition(piece));
@@ -44,8 +47,8 @@ namespace Chess.Rules
             kingHealCounter.Remove(piece);
         }
 
-        // é€šå¸¸æ”»æ’ƒå‡¦ç†
-        // è¿”ã‚Šå€¤ï¼šæ’ƒç ´ã—ãŸã‹
+        // ’ÊíUŒ‚ˆ—
+        // •Ô‚è’lFŒ‚”j‚µ‚½‚©
         public bool Attack(PieceModel attacker, PieceModel defender, CellModel cellModel, BoardModel boardModel)
         {
             var attackerStats = GetStats(attacker);
@@ -56,7 +59,7 @@ namespace Chess.Rules
                 return false; 
             }
 
-            // Rookã®è‚©ä»£ã‚ã‚Šãƒã‚§ãƒƒã‚¯ï¼ˆQueenç¯„å›²æ”»æ’ƒã¯å¯¾è±¡å¤–ï¼‰
+            // Rook‚ÌŒ¨‘ã‚í‚èƒ`ƒFƒbƒNiQueen”ÍˆÍUŒ‚‚Í‘ÎÛŠOj
             var guardRook = FindAdjacentRook(defender, cellModel);
 
             if (guardRook != null)
@@ -70,14 +73,15 @@ namespace Chess.Rules
                         RemovePiece(guardRook, boardModel, cellModel);
                     }
                 }
-                // è‚©ä»£ã‚ã‚Šã•ã‚ŒãŸã®ã§defenderã¯ç„¡å‚·ã€æ’ƒç ´ãªã—
+                // Œ¨‘ã‚í‚è‚³‚ê‚½‚Ì‚Ådefender‚Í–³AŒ‚”j‚È‚µ
                 return false;
             }
 
-            // é€šå¸¸ãƒ€ãƒ¡ãƒ¼ã‚¸
+            // ’Êíƒ_ƒ[ƒW
             defenderStats.TakeDamage(attackerStats.ATK);
+            HPChanged?.Invoke(defender, defenderStats.CurrentHP, defenderStats.MaxHP);
 
-            // KingãŒè¢«å¼¾ã—ãŸã‚‰ã‚«ã‚¦ãƒ³ãƒˆãƒªã‚»ãƒƒãƒˆ
+            // King‚ª”í’e‚µ‚½‚çƒJƒEƒ“ƒgƒŠƒZƒbƒg
             if (defender.PieceType == PieceType.King && kingHealCounter.ContainsKey(defender))
             {
                 kingHealCounter[defender] = 0;
@@ -86,8 +90,8 @@ namespace Chess.Rules
             return defenderStats.IsDefeated;
         }
 
-        // éš£æ¥ã™ã‚‹Rookã‚’æ¢ã™ï¼ˆè‚©ä»£ã‚ã‚Šåˆ¤å®šç”¨ï¼‰
-        // â€» RookåŒå£«ãŒéš£æ¥ã—ã¦ã„ã‚‹å ´åˆã¯æœ€åˆã«è¦‹ã¤ã‹ã£ãŸæ–¹ï¼ˆTODO:ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼é¸æŠUIï¼‰
+        // —×Ú‚·‚éRook‚ğ’T‚·iŒ¨‘ã‚í‚è”»’è—pj
+        // ¦ Rook“¯m‚ª—×Ú‚µ‚Ä‚¢‚éê‡‚ÍÅ‰‚ÉŒ©‚Â‚©‚Á‚½•ûiTODO:ƒvƒŒƒCƒ„[‘I‘ğUIj
         private PieceModel FindAdjacentRook(PieceModel target, CellModel cellModel)
         {
             var pos = cellModel.GetPosition(target);
@@ -110,8 +114,8 @@ namespace Chess.Rules
             return null;
         }
 
-        // Queenç¯„å›²æ”»æ’ƒï¼ˆç§»å‹•å¾Œã«å‘¨å›²8ãƒã‚¹ã®æ•µã¸10ãƒ€ãƒ¡ãƒ¼ã‚¸ï¼‰
-        // è¿”ã‚Šå€¤ï¼šæ’ƒç ´ã•ã‚ŒãŸé§’ã®ãƒªã‚¹ãƒˆ
+        // Queen”ÍˆÍUŒ‚iˆÚ“®Œã‚ÉüˆÍ8ƒ}ƒX‚Ì“G‚Ö10ƒ_ƒ[ƒWj
+        // •Ô‚è’lFŒ‚”j‚³‚ê‚½‹î‚ÌƒŠƒXƒg
         public List<PieceModel> QueenSplash(PieceModel queen, CellModel cellModel, BoardModel boardModel)
         {
             var defeated = new List<PieceModel>();
@@ -144,8 +148,9 @@ namespace Chess.Rules
                     continue;
                 }
 
-                // Queenç¯„å›²æ”»æ’ƒã¯Rookã®è‚©ä»£ã‚ã‚Šå¯¾è±¡å¤–
+                // Queen”ÍˆÍUŒ‚‚ÍRook‚ÌŒ¨‘ã‚í‚è‘ÎÛŠO
                 targetStats.TakeDamage(10);
+                HPChanged?.Invoke(target, targetStats.CurrentHP, targetStats.MaxHP);
 
                 if (target.PieceType == PieceType.King && kingHealCounter.ContainsKey(target))
                 {
@@ -157,7 +162,7 @@ namespace Chess.Rules
                 }
             }
 
-            // æ’ƒç ´ã•ã‚ŒãŸé§’ã‚’é™¤å¤–
+            // Œ‚”j‚³‚ê‚½‹î‚ğœŠO
             foreach (var piece in defeated)
             {
                 RemovePiece(piece, boardModel, cellModel);
@@ -166,7 +171,7 @@ namespace Chess.Rules
             return defeated;
         }
 
-        // Kingã®å›å¾©ã‚«ã‚¦ãƒ³ãƒˆæ›´æ–°ï¼ˆè‡ªåˆ†ã®ã‚¿ãƒ¼ãƒ³é–‹å§‹æ™‚ã«å‘¼ã¶ï¼‰
+        // King‚Ì‰ñ•œƒJƒEƒ“ƒgXVi©•ª‚Ìƒ^[ƒ“ŠJn‚ÉŒÄ‚Ôj
         public void UpdateKingRecovery(PieceColor color, CellModel cellModel)
         {
             var king = cellModel.GetKing(color);
@@ -182,11 +187,15 @@ namespace Chess.Rules
             {
                 var kingStats = GetStats(king);
                 kingStats?.Heal(20);
+                if (kingStats != null)
+                {
+                    HPChanged?.Invoke(king, kingStats.CurrentHP, kingStats.MaxHP);
+                }
                 kingHealCounter[king] = 0;
             }
         }
 
-        // Kingã®HPãŒ0ä»¥ä¸‹ã‹ãƒã‚§ãƒƒã‚¯ï¼ˆå‹åˆ©åˆ¤å®šã«ä½¿ã†ï¼‰
+        // King‚ÌHP‚ª0ˆÈ‰º‚©ƒ`ƒFƒbƒNiŸ—˜”»’è‚Ég‚¤j
         public bool IsKingDefeated(PieceColor color, CellModel cellModel)
         {
             var king = cellModel.GetKing(color);
@@ -201,15 +210,15 @@ namespace Chess.Rules
             return kingStats == null || kingStats.IsDefeated;
         }
 
-        // BattleModeã§ã¯ã‚­ãƒ£ã‚¹ãƒªãƒ³ã‚°ãƒ»ã‚¢ãƒ³ãƒ‘ãƒƒã‚µãƒ³ãªã—
-        // ãƒã‚§ãƒƒã‚¯è€ƒæ…®ãªã—ã®åˆæ³•æ‰‹ã‚’è¿”ã™
+        // BattleMode‚Å‚ÍƒLƒƒƒXƒŠƒ“ƒOEƒAƒ“ƒpƒbƒTƒ“‚È‚µ
+        // ƒ`ƒFƒbƒNl—¶‚È‚µ‚Ì‡–@è‚ğ•Ô‚·
         public override List<Vector2Int> GetLegalMoves(PieceModel piece, CellModel cellModel, BoardModel boardModel)
         {
             var moveAmount = new MoveAmount();
             return moveAmount.GetMove(piece, cellModel, boardModel);
         }
 
-        // BattleModeã§ã¯ãƒã‚§ãƒƒã‚¯ç³»ã¯ä½¿ã‚ãªã„
+        // BattleMode‚Å‚Íƒ`ƒFƒbƒNŒn‚Íg‚í‚È‚¢
         public new bool IsCheck(PieceColor color, CellModel cellModel, BoardModel boardModel) => false;
         public new bool IsCheckmate(PieceColor color, CellModel cellModel, BoardModel boardModel) => false;
         public new bool IsStalemate(PieceColor color, CellModel cellModel, BoardModel boardModel) => false;

@@ -3677,12 +3677,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveMarkerPrefab: {fileID: 2206679847690749449, guid: 7b910e54410d5da4fb158fb3d1066ea1, type: 3}
-  pawnPrefab: {fileID: 8139513616102659973, guid: 7ca61b73fdd436c4ba0851a1e17d1296, type: 3}
-  rookPrefab: {fileID: 2749765045041769151, guid: f40532eab3ba9b34da980a21e3428356, type: 3}
-  knightPrefab: {fileID: 3628599292939477885, guid: 1d593c57deafa6a4b97fec7aa02d65ba, type: 3}
-  bishopPrefab: {fileID: 8487910163979461992, guid: 9977f0af8cd348e4588651b131a27ae8, type: 3}
-  queenPrefab: {fileID: 6975859394836014514, guid: b5d011b533c06294c9303d5889a744cf, type: 3}
-  kingPrefab: {fileID: 2928430791536085120, guid: cbfbd56bbb8ed244e9ecf9b26e77bb30, type: 3}
+  pawnPrefab: {fileID: 2261346069490174833, guid: 837c3fa2cc92d8944b179df9dab48cce, type: 3}
+  rookPrefab: {fileID: -2401010746769518278, guid: d7178d2caf9e1614da0dc87add87589f, type: 3}
+  knightPrefab: {fileID: 6588943508454598128, guid: 9b8b5a75a36ee634295e504c242a82ce, type: 3}
+  bishopPrefab: {fileID: -7120220011073084246, guid: 9e853dc75d2f0e44cb5b904acbe6bcdd, type: 3}
+  queenPrefab: {fileID: -8318913423626527617, guid: fc761659d8b0e7142b3279adb009f30c, type: 3}
+  kingPrefab: {fileID: -47971737987485615, guid: 89aba1df08be5c949ae87a89b3704c4f, type: 3}
   cellSize: 0.239
   boardReferencepos: 3.5
 --- !u!1 &1605653113
