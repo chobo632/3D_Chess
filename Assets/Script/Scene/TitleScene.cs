@@ -10,13 +10,13 @@ namespace Chess.Scene
         [SerializeField] private CanvasGroup playerCountPanel;
         [SerializeField] private CanvasGroup modePanel;
         [SerializeField] private CanvasGroup cameraModePanel;
-        // Modeパネル表示時に背景を暗くする
-        [SerializeField] private Image titleImage;
+        // 背景の色を少し暗くする
+        [SerializeField] private GameObject darkOverlay;
 
         // 人数選択画面に移行
-        public void OnClickMode()
+        public void OnClickPlay()
         {
-            titleImage.color = new Color(1, 1, 1, 0.3f);
+            darkOverlay.SetActive(true);
             ShowPanel(playerCountPanel);
         }
         // Exitボタン
@@ -40,7 +40,7 @@ namespace Chess.Scene
         // 人数選択画面からTitle画面に戻る
         public void OnClickBackToTitle()
         {
-            titleImage.color = new Color(1, 1, 1, 1f);
+            darkOverlay.SetActive(false);
             ShowPanel(titlePanel);
         }
 

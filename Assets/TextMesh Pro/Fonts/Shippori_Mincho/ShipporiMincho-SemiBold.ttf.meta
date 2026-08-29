@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 66062a1ef5768b2479215706103e01c0
+guid: 1d25c6e6828cd4f408cf12e1ac2051c0
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Zen Old Mincho
+  - Shippori Mincho
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
