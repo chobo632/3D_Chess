@@ -11,6 +11,8 @@ namespace Chess.GamePlay
 
         private PieceModel selectPiece;
         private PieceView selectPieceController;
+        private PieceModel lastMovingPiece;
+        private PieceView lastMovingController;
         private Color originalColor;
         private List<Vector2Int> currentLegalMoves = new();
 
@@ -119,6 +121,12 @@ namespace Chess.GamePlay
             {
                 RestorePieceColor(selectPiece, selectPieceController);
                 var movingPiece = selectPiece;
+                var movingController = selectPieceController;
+
+                // çUåÇé∏îséûÇÃÇΩÇﬂÇ…ëﬁî
+                lastMovingPiece = movingPiece;
+                lastMovingController = movingController;
+
                 selectPiece = null;
                 selectPieceController = null;
                 currentLegalMoves.Clear();
@@ -192,16 +200,18 @@ namespace Chess.GamePlay
         // åÇîjé∏îséûÇÃèàóù
         private void OnAttackFailed(PieceModel piece)
         {
-            if (selectPiece != piece) return;
+            if (lastMovingPiece != piece)
+            {
+                return;
+            }
 
             // ïÇÇ¢ÇΩãÓÇå≥ÇÃà íuÇ…ñﬂÇ∑
-            selectPieceController.MoveTo(board.GetWorldPosition(board.Model.GetPosition(selectPiece)));
-            RestorePieceColor(selectPiece, selectPieceController);
+            lastMovingController.MoveTo(board.GetWorldPosition(board.Model.GetPosition(piece)));
+            lastMovingController.SetColor(piece.PieceColor);
 
             board.HideMoves();
-            selectPiece = null;
-            selectPieceController = null;
-            currentLegalMoves.Clear();
+            lastMovingPiece = null;
+            lastMovingController = null;
         }
     }
 }
