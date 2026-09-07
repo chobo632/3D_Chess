@@ -25,10 +25,12 @@ namespace Chess.Scene
             GameManager.Instance.RandomModeStarted += OnRandomModeStarted;
             GameManager.Instance.LotteryPiecesUpdated += GameUIManager.Instance.ShowLotteryPieces;
             GameManager.Instance.RerollCountUpdated += GameUIManager.Instance.UpdateRerollText;
+            GameManager.Instance.KingHPChanged += GameUIManager.Instance.UpdateKingHP;
 
             // GameManagerにModeをセット
             GameManager.Instance.SetMode(SceneController.Instance.selectMode);
-
+            // BattleModeのみKing HP表示
+            GameUIManager.Instance.ShowKingHP(GameManager.Instance.IsBattleMode());
             // 最初はポーズパネルを非表示
             GameUIManager.Instance.ShowPause(false);
 
@@ -104,6 +106,7 @@ namespace Chess.Scene
                 GameManager.Instance.RandomModeStarted -= OnRandomModeStarted;
                 GameManager.Instance.LotteryPiecesUpdated -= GameUIManager.Instance.ShowLotteryPieces;
                 GameManager.Instance.RerollCountUpdated -= GameUIManager.Instance.UpdateRerollText;
+                GameManager.Instance.KingHPChanged -= GameUIManager.Instance.UpdateKingHP;
             }
         }
 

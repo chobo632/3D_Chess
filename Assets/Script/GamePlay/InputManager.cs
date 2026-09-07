@@ -1,6 +1,7 @@
+using Chess.Core;
+using Chess.UI;
 using System.Collections.Generic;
 using UnityEngine;
-using Chess.Core;
 
 namespace Chess.GamePlay
 {
@@ -162,6 +163,16 @@ namespace Chess.GamePlay
             originalColor = selectPieceController.GetCurrentColor();
             selectPieceController.Lift(board.GetWorldPosition(board.Model.GetPosition(selectPiece)), 0.3f);
             selectPieceController.SetHighlightColor(new Color(1.0f, 0.5f, 0.5f, 1.0f));
+
+            // BattleModeのみステータス表示
+            if (GameManager.Instance.IsBattleMode())
+            {
+                var stats = GameManager.Instance.GetBattleStats(piece);
+                if (stats != null)
+                {
+                    GameUIManager.Instance.ShowPieceStatus(piece, stats);
+                }
+            }
         }
 
         private void RestorePieceColor(PieceModel piece, PieceView controller)
@@ -195,6 +206,7 @@ namespace Chess.GamePlay
             selectPiece = null;
             selectPieceController= null;
             currentLegalMoves.Clear();
+            GameUIManager.Instance.HidePieceStatus();
         }
 
         // 撃破失敗時の処理

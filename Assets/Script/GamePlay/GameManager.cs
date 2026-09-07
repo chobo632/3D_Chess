@@ -19,7 +19,7 @@ namespace Chess.GamePlay
 
         // ターン・チェック・プロモーション・終了イベント
         public Action<int> TurnChanged;
-        public Action<bool> CheckChanged;
+        public Action<PieceColor> CheckChanged;
         public Action<PieceModel> PromotionRequested;
         public Action<GameResult> GameEnd;
 
@@ -27,6 +27,9 @@ namespace Chess.GamePlay
         public Action RandomModeStarted;
         public Action<List<PieceModel>> LotteryPiecesUpdated;
         public Action<int> RerollCountUpdated;
+
+        // RandomMode関連イベント
+        public Action<PieceColor, int, int> KingHPChanged;
 
         // コイントス結果イベント
         public Action<string> CointossResultReady;
@@ -39,6 +42,8 @@ namespace Chess.GamePlay
         public bool IsPaused { get; set; }
         public bool IsCointoss { get; set; }
         public bool IsPromotion { get; private set; }
+
+        public bool IsBattleMode() => gameModeBase is BattleMode;
 
         // 特殊ルール実行
         private MoveExecutor moveExecutor;
@@ -114,6 +119,12 @@ namespace Chess.GamePlay
                 battleMode.HPChanged += (piece, current, max) =>
                 {
                     board.GetController(piece)?.UpdateHP(current, max);
+
+                    // KingのHPが変わった時はKingHPChangedを発火
+                    if (piece.PieceType == PieceType.King)
+                    {
+                        KingHPChanged?.Invoke(piece.PieceColor, current, max);
+                    }
                 };
             }
         }
@@ -357,7 +368,9 @@ namespace Chess.GamePlay
             // チェック判定表示
             else
             {
-                CheckChanged?.Invoke(gameModeBase.IsCheck(currentTurn, board.Model, board));
+                // チェックされている側の色を渡す
+                var checkedColor = gameModeBase.IsCheck(currentTurn, board.Model, board) ? currentTurn : PieceColor.None;
+                CheckChanged?.Invoke(checkedColor);
             }
         }
 
@@ -468,6 +481,16 @@ namespace Chess.GamePlay
             if (SceneController.Instance.playerCount != PlayerCount.SoloPlay) return false;
             if (aiPlayer == null) return false;
             return piece.PieceColor == aiColor;
+        }
+
+        // BattleModeの駒ステータスを取得
+        public BattleStats GetBattleStats(PieceModel piece)
+        {
+            if (gameModeBase is BattleMode battleMode)
+            {
+                return battleMode.GetStats(piece);
+            }
+            return null;
         }
     }
 }

@@ -1,5 +1,4 @@
 using Chess.Core;
-using Chess.GamePlay;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,6 +11,7 @@ namespace Chess.UI
         [SerializeField] private PromotionPanel promotionPanel;
         [SerializeField] private RandomModePanel randomModePanel;
         [SerializeField] private GameStatusPanel gameStatusPanel;
+        [SerializeField] private PieceStatusPanel pieceStatusPanel;
 
         public static GameUIManager Instance;
 
@@ -26,9 +26,13 @@ namespace Chess.UI
         public void ShowPause(bool show) => pausePanel.ShowPause(show);
         public void ShowPromotion(PieceModel piece) => promotionPanel.ShowPromotion(piece);
         public void UpdateTurnText(int turnCount) => gameStatusPanel.UpdateTurnText(turnCount);
-        public void ShowCheckText(bool show) => gameStatusPanel.ShowCheckText(show);
         public void ShowRandomMode(bool show) => randomModePanel.ShowRandomMode(show);
         public void ShowLotteryPieces(List<PieceModel> pieces) => randomModePanel.ShowLotteryPieces(pieces);
         public void UpdateRerollText(int count) => randomModePanel.UpdateRerollText(count);
+        public void ShowPieceStatus(PieceModel piece, BattleStats stats) => pieceStatusPanel.Show(piece, stats);
+        public void HidePieceStatus() => pieceStatusPanel.Hide();
+        public void ShowCheckText(PieceColor color) => gameStatusPanel.ShowCheckText(color);
+        public void ShowKingHP(bool show) => gameStatusPanel.ShowKingHP(show);
+        public void UpdateKingHP(PieceColor color, int current, int max) => gameStatusPanel.UpdateKingHP(color, current, max);
     }
 }
