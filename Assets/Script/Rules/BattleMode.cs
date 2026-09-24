@@ -14,6 +14,9 @@ namespace Chess.Rules
         // KingのHP回復カウント（自分のターン基準で何ターン被弾なしか）
         private readonly Dictionary<PieceModel, int> kingHealCounter = new();
 
+        private int knightReactCount = 0;
+        private const int MaxReactCount = 2;
+
         // 駒登録（ゲーム開始時・プロモーション時に呼ぶ）
         public void RegisterPiece(PieceModel piece)
         {
@@ -112,6 +115,100 @@ namespace Chess.Rules
             }
 
             return null;
+        }
+
+        // 再行動可能かチェック
+        public bool CanReact(PieceModel piece)
+        {
+            return piece.PieceType == PieceType.Knight && knightReactCount < MaxReactCount;
+        }
+
+        // 再行動カウントを増やす
+        public void AddReactCount()
+        {
+            knightReactCount++;
+        }
+
+        // 再行動カウントをリセット（ターン終了時に呼ぶ）
+        public void ResetReactCount()
+        {
+            knightReactCount = 0;
+        }
+
+        // 
+        public List<PieceModel> ExecuteBishopMove(PieceModel bishop, Vector2Int destination, CellModel cellModel, BoardModel boardModel)
+        {
+            var defeated = new List<PieceModel>();
+            var from = cellModel.GetPosition(bishop);
+
+            int dx = System.Math.Sign(destination.x - from.x);
+            int dy = System.Math.Sign(destination.y - from.y);
+
+            int pierceCount = 0;
+            var current = from + new Vector2Int(dx, dy);
+
+            // 移動先の1つ手前まで経路をチェック（貫通ダメージ）
+            while (current != destination)
+            {
+                var pathPiece = cellModel.GetPiece(current);
+
+                if (pathPiece != null && pathPiece.PieceColor != bishop.PieceColor)
+                {
+                    int pierceDamage = pierceCount == 0 ? 20 : 10;
+                    var pathStats = GetStats(pathPiece);
+
+                    if (pathStats != null)
+                    {
+                        pathStats.TakeDamage(pierceDamage);
+                        HPChanged?.Invoke(pathPiece, pathStats.CurrentHP, pathStats.MaxHP);
+
+                        if (pathPiece.PieceType == PieceType.King && kingHealCounter.ContainsKey(pathPiece))
+                        {
+                            kingHealCounter[pathPiece] = 0;
+                        }
+
+                        if (pathStats.IsDefeated)
+                        {
+                            defeated.Add(pathPiece);
+                        }
+
+                        pierceCount++;
+                    }
+                }
+
+                current += new Vector2Int(dx, dy);
+            }
+
+            // 経路上で撃破した駒を除外
+            foreach (var piece in defeated)
+            {
+                RemovePiece(piece, boardModel, cellModel);
+            }
+
+            // 移動先の敵に10ダメージ（撃破できる場合のみここに来る）
+            var destPiece = cellModel.GetPiece(destination);
+            if (destPiece != null && destPiece.PieceColor != bishop.PieceColor)
+            {
+                var destStats = GetStats(destPiece);
+                if (destStats != null)
+                {
+                    destStats.TakeDamage(10);
+                    HPChanged?.Invoke(destPiece, destStats.CurrentHP, destStats.MaxHP);
+
+                    if (destPiece.PieceType == PieceType.King && kingHealCounter.ContainsKey(destPiece))
+                    {
+                        kingHealCounter[destPiece] = 0;
+                    }
+
+                    if (destStats.IsDefeated)
+                    {
+                        defeated.Add(destPiece);
+                        RemovePiece(destPiece, boardModel, cellModel);
+                    }
+                }
+            }
+
+            return defeated;
         }
 
         // Queen範囲攻撃（移動後に周囲8マスの敵へ10ダメージ）
@@ -215,6 +312,12 @@ namespace Chess.Rules
         public override List<Vector2Int> GetLegalMoves(PieceModel piece, CellModel cellModel, BoardModel boardModel)
         {
             var moveAmount = new MoveAmount();
+            if (piece.PieceType == PieceType.Bishop)
+            {
+                // BattleMode専用：stats情報を渡す
+                return moveAmount.GetBishopBattleMoves(piece, cellModel, stats);
+            }
+
             return moveAmount.GetMove(piece, cellModel, boardModel);
         }
 

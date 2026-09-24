@@ -12,6 +12,7 @@ namespace Chess.UI
         [SerializeField] private RandomModePanel randomModePanel;
         [SerializeField] private GameStatusPanel gameStatusPanel;
         [SerializeField] private PieceStatusPanel pieceStatusPanel;
+        [SerializeField] private GameObject endReactButton;
 
         public static GameUIManager Instance;
 
@@ -34,5 +35,9 @@ namespace Chess.UI
         public void ShowCheckText(PieceColor color) => gameStatusPanel.ShowCheckText(color);
         public void ShowKingHP(bool show) => gameStatusPanel.ShowKingHP(show);
         public void UpdateKingHP(PieceColor color, int current, int max) => gameStatusPanel.UpdateKingHP(color, current, max);
+        public void ShowEndReactButton(bool show)
+        {
+            endReactButton.SetActive(show);
+        }
     }
 }

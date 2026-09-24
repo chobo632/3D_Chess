@@ -34,6 +34,9 @@ namespace Chess.GamePlay
         // コイントス結果イベント
         public Action<string> CointossResultReady;
 
+        // 再行動通知イベント追加
+        public Action<PieceModel> ReactPiece;
+
         // 
         public PieceColor currentTurn = PieceColor.White;
         public int turnCount = 0;
@@ -44,6 +47,8 @@ namespace Chess.GamePlay
         public bool IsPromotion { get; private set; }
 
         public bool IsBattleMode() => gameModeBase is BattleMode;
+
+        public bool IsWaitingForReact { get; private set; } = false;
 
         // 特殊ルール実行
         private MoveExecutor moveExecutor;
@@ -175,6 +180,13 @@ namespace Chess.GamePlay
         {
             var target = board.GetPiece(pos);
 
+            if (piece.PieceType == PieceType.Bishop)
+            {
+                // Bishop専用処理
+                ExecuteBishopBattleMove(piece, pos, target, battleMode);
+                return;
+            }
+
             if (target == null)
             {
                 // 空マスへの通常移動
@@ -193,6 +205,14 @@ namespace Chess.GamePlay
 
                 if (defeated)
                 {
+                    if (target.PieceType == PieceType.King)
+                    {
+                        battleMode.RemovePiece(target, board, board.Model);
+                        board.ExecuteMove(piece, pos);
+                        CheckBattleGameEnd(battleMode);
+                        return;
+                    }
+
                     // 撃破成功時敵を除外して攻撃側が前進
                     battleMode.RemovePiece(target, board, board.Model);
                     board.ExecuteMove(piece, pos);
@@ -203,7 +223,14 @@ namespace Chess.GamePlay
                         battleMode.QueenSplash(piece, board.Model, board);
                     }
 
-                    // TODO フェーズ2：Knight再行動
+                    // Knight再行動
+                    if (battleMode.CanReact(piece))
+                    {
+                        battleMode.AddReactCount();
+                        IsWaitingForReact = true;
+                        ReactPiece?.Invoke(piece);
+                        return;
+                    }
                 }
                 else
                 {
@@ -211,6 +238,8 @@ namespace Chess.GamePlay
                     AttackFailed?.Invoke(piece);
                 }
             }
+            IsWaitingForReact = false;
+            battleMode.ResetReactCount();
 
             // BattleMode勝利判定
             if (CheckBattleGameEnd(battleMode)) return;
@@ -219,6 +248,49 @@ namespace Chess.GamePlay
             if (JudgementPromotion(piece)) return;
 
             EndTurn();            
+        }
+
+        // 再行動をキャンセルしてターン終了（UIのボタンから呼ぶ想定）
+        public void EndReact()
+        {
+            if (!IsWaitingForReact) return;
+            IsWaitingForReact = false;
+
+            if (gameModeBase is BattleMode battleMode)
+            {
+                battleMode.ResetReactCount();
+            }
+
+            CheckBattleGameEnd(gameModeBase as BattleMode);
+            EndTurn();
+        }
+
+        // Bishop専用の移動・攻撃処理
+        private void ExecuteBishopBattleMove(PieceModel bishop, Vector2Int pos, PieceModel target, BattleMode battleMode)
+        {
+            // 経路上の貫通ダメージ＋移動先への10ダメージをまとめて処理
+            var defeated = battleMode.ExecuteBishopMove(bishop, pos, board.Model, board);
+
+            // 撃破した中にKingがいたらゲーム終了
+            foreach (var piece in defeated)
+            {
+                if (piece.PieceType == PieceType.King)
+                {
+                    board.ExecuteMove(bishop, pos);
+                    CheckBattleGameEnd(battleMode);
+                    return;
+                }
+            }
+
+            // Bishopを移動（移動先が空になっているはずなので常に移動可能）
+            board.ExecuteMove(bishop, pos);
+
+            IsWaitingForReact = false;
+            battleMode.ResetReactCount();
+
+            if (CheckBattleGameEnd(battleMode)) return;
+            if (JudgementPromotion(bishop)) return;
+            EndTurn();
         }
 
         // プロモーション判定

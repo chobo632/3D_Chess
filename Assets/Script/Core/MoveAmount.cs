@@ -1,11 +1,11 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Chess.Core
 {
     public class MoveAmount
     {
-        // Še‹î‚ÌˆÚ“®”ÍˆÍİ’è
+        // å„é§’ã®ç§»å‹•ç¯„å›²è¨­å®š
         public List<Vector2Int> GetMove(PieceModel piece, CellModel cellModel, BoardModel boardModel)
         {
             var moves = new List<Vector2Int>();
@@ -14,22 +14,22 @@ namespace Chess.Core
             switch (piece.PieceType)
             {
                 case PieceType.Rook:
-                    // ã‰º¶‰E‚ÉƒXƒ‰ƒCƒh
+                    // ä¸Šä¸‹å·¦å³ã«ã‚¹ãƒ©ã‚¤ãƒ‰
                     moves.AddRange(GetSlidingMoves(pos, new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right }, piece.PieceColor, cellModel));
                     break;
 
                 case PieceType.Bishop:
-                    // Î‚ß4•ûŒü‚ÉƒXƒ‰ƒCƒh
+                    // æ–œã‚4æ–¹å‘ã«ã‚¹ãƒ©ã‚¤ãƒ‰
                     moves.AddRange(GetSlidingMoves(pos, new Vector2Int[] { new(1, 1), new(1, -1), new(-1, 1), new(-1, -1) }, piece.PieceColor, cellModel));
                     break;
 
                 case PieceType.Queen:
-                    // 8•ûŒü‘S‚Ä‚ÉƒXƒ‰ƒCƒh
+                    // 8æ–¹å‘å…¨ã¦ã«ã‚¹ãƒ©ã‚¤ãƒ‰
                     moves.AddRange(GetSlidingMoves(pos, new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right, new(1, 1), new(1, -1), new(-1, 1), new(-1, -1) }, piece.PieceColor, cellModel));
                     break;
 
                 case PieceType.Knight:
-                    // ƒiƒCƒg“Á—L‚ÌLšƒXƒeƒbƒv
+                    // ãƒŠã‚¤ãƒˆç‰¹æœ‰ã®Lå­—ã‚¹ãƒ†ãƒƒãƒ—
                     Vector2Int[] knightSteps =
                     { new(1, 2),
                       new(2, 1),
@@ -45,7 +45,7 @@ namespace Chess.Core
                     break;
 
                 case PieceType.King:
-                    // üˆÍ1ƒ}ƒX
+                    // å‘¨å›²1ãƒã‚¹
                     Vector2Int[] kingSteps =
                     { Vector2Int.up,
                       Vector2Int.down,
@@ -68,10 +68,10 @@ namespace Chess.Core
             return moves;
         }
 
-        // ƒ|[ƒ“ê—pˆÚ“®ŠÖ”
+        // ãƒãƒ¼ãƒ³å°‚ç”¨ç§»å‹•é–¢æ•°
         private void GetPawnMoves(PieceModel piece, Vector2Int pos, CellModel cellModel,BoardModel boardModel, List<Vector2Int> moves)
         {
-            // is•ûŒü•ˆÚ“®—Ê
+            // é€²è¡Œæ–¹å‘ï¼†ç§»å‹•é‡
             int dir = piece.GetForwardDirection();
             var forward = pos + new Vector2Int(0, dir);
             var doubleForward = pos + new Vector2Int(0, dir * 2);
@@ -86,7 +86,7 @@ namespace Chess.Core
 
             bool isMoved = boardModel.GetController(piece)?.IsMoved ?? false;
 
-            // ’Êíƒ|[ƒ“ˆÚ“®
+            // é€šå¸¸ãƒãƒ¼ãƒ³ç§»å‹•
             if (frontPiece == null)
             {
                 moves.Add(forward);
@@ -97,7 +97,7 @@ namespace Chess.Core
                 }
             }
 
-            // ‘Šè‚Ì‹î‚ªæ‚ê‚éˆÊ’u‚É‚ ‚é‚ÌˆÚ“®
+            // ç›¸æ‰‹ã®é§’ãŒå–ã‚Œã‚‹ä½ç½®ã«ã‚ã‚‹æ™‚ã®ç§»å‹•
             if (targetPieceR != null && targetPieceR.PieceColor != piece.PieceColor)
             {
                 moves.Add(diagonallyR);
@@ -106,6 +106,61 @@ namespace Chess.Core
             {
                 moves.Add(diagonallyL);
             }
+        }
+
+        public List<Vector2Int> GetBishopBattleMoves(PieceModel piece, CellModel cellModel, Dictionary<PieceModel, BattleStats> stats)
+        {
+            var moves = new List<Vector2Int>();
+            var pos = cellModel.GetPosition(piece);
+            var directions = new Vector2Int[] { new(1, 1), new(1, -1), new(-1, 1), new(-1, -1) };
+
+            foreach (var dir in directions)
+            {
+                int pierceCount = 0;
+
+                for (int i = 1; i < 8; i++)
+                {
+                    var target = pos + dir * i;
+                    if (IsOffBoard(target))
+                    {
+                        break;
+                    }
+
+                    var targetPiece = cellModel.GetPiece(target);
+
+                    if (targetPiece == null)
+                    {
+                        // ç©ºãƒã‚¹ã¯é€šå¸¸é€šã‚Šè¿½åŠ 
+                        moves.Add(target);
+                    }
+                    else if (targetPiece.PieceColor == piece.PieceColor)
+                    {
+                        // å‘³æ–¹ã¯é€šã‚ŠæŠœã‘ï¼ˆã‚«ã‚¦ãƒ³ãƒˆæ¶ˆè²»ãªã—ãƒ»ç§»å‹•å…ˆã«ã¯ãªã‚Œãªã„ï¼‰
+                        continue;
+                    }
+                    else
+                    {
+                        // æ•µãŒã„ã‚‹å ´åˆ
+                        if (pierceCount < 2)
+                        {
+                            // è²«é€šé€šéï¼ˆç§»å‹•å…ˆã«ã¯ãªã‚Œãªã„ï¼‰
+                            pierceCount++;
+                        }
+                        else
+                        {
+                            // ç§»å‹•å…ˆã®æ•µï¼šHPâ‰¤10ã®å ´åˆã®ã¿ç§»å‹•å¯èƒ½
+                            if (stats.TryGetValue(targetPiece, out var targetStats)
+                                && targetStats.CurrentHP <= 10)
+                            {
+                                moves.Add(target);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return moves;
         }
 
         // 
@@ -119,7 +174,7 @@ namespace Chess.Core
                 {
                     var target = start + dir * i;
 
-                    // ”ÕŠO‚È‚çI—¹
+                    // ç›¤å¤–ãªã‚‰çµ‚äº†
                     if (IsOffBoard(target))
                     break;
 

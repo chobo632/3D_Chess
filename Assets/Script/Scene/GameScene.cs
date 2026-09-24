@@ -26,6 +26,7 @@ namespace Chess.Scene
             GameManager.Instance.LotteryPiecesUpdated += GameUIManager.Instance.ShowLotteryPieces;
             GameManager.Instance.RerollCountUpdated += GameUIManager.Instance.UpdateRerollText;
             GameManager.Instance.KingHPChanged += GameUIManager.Instance.UpdateKingHP;
+            GameManager.Instance.ReactPiece += OnReactStarted;
 
             // GameManagerにModeをセット
             GameManager.Instance.SetMode(SceneController.Instance.selectMode);
@@ -93,6 +94,18 @@ namespace Chess.Scene
             SceneController.Instance.ChangeScene("TitleScene");
         }
 
+        //
+        public void OnClickEndReact()
+        {
+            GameManager.Instance.EndReact();
+        }
+        //
+        private void OnReactStarted(PieceModel piece)
+        {
+            // 再行動中はターン終了ボタンを表示
+            GameUIManager.Instance.ShowEndReactButton(true);
+        }
+
         // 
         private void OnDestroy()
         {
@@ -107,6 +120,7 @@ namespace Chess.Scene
                 GameManager.Instance.LotteryPiecesUpdated -= GameUIManager.Instance.ShowLotteryPieces;
                 GameManager.Instance.RerollCountUpdated -= GameUIManager.Instance.UpdateRerollText;
                 GameManager.Instance.KingHPChanged -= GameUIManager.Instance.UpdateKingHP;
+                GameManager.Instance.ReactPiece -= OnReactStarted;
             }
         }
 

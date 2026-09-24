@@ -25,8 +25,8 @@ namespace Chess.UI
             panelGroup.blocksRaycasts = true;
 
             pieceNameText.text = piece.PieceType.ToString();
-            hpText.text = $"HPÅF{stats.CurrentHP} / {stats.MaxHP}";
-            atkText.text = $"ATKÅF{stats.ATK}";
+            hpText.text = $"HP:{stats.CurrentHP}/{stats.MaxHP}";
+            atkText.text = $"ATK:{stats.ATK}";
             abilityText.text = GetAbilityText(piece.PieceType);
         }
 

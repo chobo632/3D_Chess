@@ -14,12 +14,14 @@ namespace Chess.GamePlay
         private PieceView selectPieceController;
         private PieceModel lastMovingPiece;
         private PieceView lastMovingController;
+        private PieceModel reactPiece;
         private Color originalColor;
         private List<Vector2Int> currentLegalMoves = new();
 
         private void Start()
         {
             GameManager.Instance.AttackFailed += OnAttackFailed;
+            GameManager.Instance.ReactPiece += OnReactStart;
         }
 
         private void OnDestroy()
@@ -27,6 +29,7 @@ namespace Chess.GamePlay
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.AttackFailed -= OnAttackFailed;
+                GameManager.Instance.ReactPiece -= OnReactStart;
             }
         }
 
@@ -92,6 +95,12 @@ namespace Chess.GamePlay
 
             // 抽選された駒のみ選択可能
             if (!GameManager.Instance.IsLotteryPiece(piece))
+            {
+                return;
+            }
+
+            // 再行動中は再行動対象のKnightのみ選択可能
+            if (GameManager.Instance.IsWaitingForReact && piece != reactPiece)
             {
                 return;
             }
@@ -193,6 +202,7 @@ namespace Chess.GamePlay
             if (selectPiece != null)
             {
                 selectPieceController.MoveTo(board.GetWorldPosition(board.Model.GetPosition(selectPiece)));
+                //RestorePieceColor(selectPiece, selectPieceController);
 
                 // 抽選された駒なら抽選色に戻す、そうでなければ元の色に戻す
                 if (GameManager.Instance.IsLotteryPiece(selectPiece))
@@ -207,6 +217,12 @@ namespace Chess.GamePlay
             selectPieceController= null;
             currentLegalMoves.Clear();
             GameUIManager.Instance.HidePieceStatus();
+
+            // 再行動中の場合は再度Knightを選択状態に戻す
+            if (GameManager.Instance.IsWaitingForReact && reactPiece != null)
+            {
+                SelectPiece(reactPiece);
+            }
         }
 
         // 撃破失敗時の処理
@@ -224,6 +240,14 @@ namespace Chess.GamePlay
             board.HideMoves();
             lastMovingPiece = null;
             lastMovingController = null;
+        }
+
+        // 再行動開始時の処理
+        private void OnReactStart(PieceModel piece)
+        {
+            reactPiece = piece;
+            // 再行動対象のKnightを自動選択状態にする
+            SelectPiece(piece);
         }
     }
 }
