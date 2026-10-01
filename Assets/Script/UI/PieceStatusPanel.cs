@@ -45,11 +45,16 @@ namespace Chess.UI
 
         private string GetAbilityText(PieceType type) => type switch
         {
-            PieceType.Knight => "再行動（撃破時・上限2回）",
-            PieceType.Bishop => "貫通ダメージ（経路の敵へ20→10）",
-            PieceType.Rook => "肩代わり（隣接味方への攻撃を代受け）",
-            PieceType.Queen => "範囲攻撃（移動後・周囲8マスへ10ダメージ）",
-            PieceType.King => "HP回復（2ターン無被弾で+20）",
+            //PieceType.Knight => "再行動（撃破時・上限2回）",
+            //PieceType.Bishop => "貫通ダメージ（経路の敵へ20→10）",
+            //PieceType.Rook => "肩代わり（隣接味方への攻撃を代受け）",
+            //PieceType.Queen => "範囲攻撃（移動後・周囲8マスへ10ダメージ）",
+            //PieceType.King => "HP回復（2ターン無被弾で+20）",
+            PieceType.Knight => "再行動",
+            PieceType.Bishop => "貫通ダメージ",
+            PieceType.Rook => "肩代わり",
+            PieceType.Queen => "範囲攻撃",
+            PieceType.King => "HP回復",
             _ => "なし"
         };
     }
