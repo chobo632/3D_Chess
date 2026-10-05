@@ -71,6 +71,7 @@ namespace Chess.Core
             if (hpCanvas == null) return;
 
             hpCanvas.SetActive(true);
+
             if (hpBar != null)
             {
                 hpBar.value = (float)currentHP / maxHP;
@@ -84,7 +85,10 @@ namespace Chess.Core
         // HP表示を非表示（BattleMode以外用）
         public void HideHP()
         {
-            if (hpCanvas != null) hpCanvas.SetActive(false);
+            if (hpCanvas != null)
+            {
+                hpCanvas.SetActive(false);
+            }
         }
     }
 }

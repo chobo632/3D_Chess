@@ -41,7 +41,10 @@ namespace Chess.Core
                       new(-1, 2)
                     };
 
-                    foreach (var step in knightSteps) AddIfValid(pos + step, piece.PieceColor, cellModel, moves);
+                    foreach (var step in knightSteps)
+                    {
+                        AddIfValid(pos + step, piece.PieceColor, cellModel, moves);
+                    }
                     break;
 
                 case PieceType.King:
@@ -57,7 +60,10 @@ namespace Chess.Core
                       new(-1, -1)
                     };
 
-                    foreach (var step in kingSteps) AddIfValid(pos + step, piece.PieceColor, cellModel, moves);
+                    foreach (var step in kingSteps)
+                    {
+                        AddIfValid(pos + step, piece.PieceColor, cellModel, moves);
+                    }
                     break;
 
                 case PieceType.Pawn:
@@ -121,6 +127,7 @@ namespace Chess.Core
                 for (int i = 1; i < 8; i++)
                 {
                     var target = pos + dir * i;
+
                     if (IsOffBoard(target))
                     {
                         break;
@@ -149,8 +156,7 @@ namespace Chess.Core
                         else
                         {
                             // 移動先の敵：HP≤10の場合のみ移動可能
-                            if (stats.TryGetValue(targetPiece, out var targetStats)
-                                && targetStats.CurrentHP <= 10)
+                            if (stats.TryGetValue(targetPiece, out var targetStats) && targetStats.CurrentHP <= 10)
                             {
                                 moves.Add(target);
                             }
