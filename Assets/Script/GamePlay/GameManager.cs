@@ -522,6 +522,9 @@ namespace Chess.GamePlay
 
             board.HideMoves();
             MoveRequest(piece, pos);
+
+            // 攻撃失敗時はコントローラーを元の位置に戻す
+            controller.MoveTo(board.GetWorldPosition(board.Model.GetPosition(piece)));
         }
 
         // ポーズ中は時間を止める待機

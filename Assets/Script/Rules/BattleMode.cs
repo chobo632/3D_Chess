@@ -284,6 +284,7 @@ namespace Chess.Rules
             {
                 var kingStats = GetStats(king);
                 kingStats?.Heal(20);
+
                 if (kingStats != null)
                 {
                     HPChanged?.Invoke(king, kingStats.CurrentHP, kingStats.MaxHP);
