@@ -15,6 +15,7 @@ namespace Chess.GamePlay
         private PieceModel lastMovingPiece;
         private PieceView lastMovingController;
         private PieceModel reactPiece;
+        private PieceModel hoveredPiece;
         private Color originalColor;
         private List<Vector2Int> currentLegalMoves = new();
 
@@ -43,6 +44,9 @@ namespace Chess.GamePlay
             {
                 return;
             }
+
+            // 
+            HandleHover();
 
             // 駒の選択
             if (Input.GetMouseButtonDown(0))
@@ -160,6 +164,10 @@ namespace Chess.GamePlay
         // 駒を選択状態にする
         private void SelectPiece(PieceModel piece)
         {
+            // ホバー状態をリセット
+            hoveredPiece = null;
+            board.HideMoves();
+
             board.HideMoves();
             selectPiece = piece;
             selectPieceController = board.GetController(piece);
@@ -248,6 +256,59 @@ namespace Chess.GamePlay
             reactPiece = piece;
             // 再行動対象のKnightを自動選択状態にする
             SelectPiece(piece);
+        }
+
+        // ホバー処理
+        private void HandleHover()
+        {
+            // 駒選択中はホバー表示しない
+            if (selectPiece != null) return;
+
+            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, boardLayerMask))
+            {
+                var boardPos = board.GetBoardPosition(hit.point);
+                var piece = board.GetPiece(boardPos);
+
+                // 同じ駒をホバー中なら何もしない
+                if (piece == hoveredPiece) return;
+
+                // 前のホバー表示をクリア
+                ClearHover();
+
+                if (piece == null) return;
+
+                // 新しいホバー表示
+                hoveredPiece = piece;
+                var legalMoves = GameManager.Instance.GetLegalMoves(piece);
+                board.ShowMoves(legalMoves);
+
+                // BattleModeのみステータス表示
+                if (GameManager.Instance.IsBattleMode())
+                {
+                    var stats = GameManager.Instance.GetBattleStats(piece);
+                    if (stats != null)
+                    {
+                        GameUIManager.Instance.ShowPieceStatus(piece, stats);
+                    }
+                }
+            }
+            else
+            {
+                // 盤外にカーソルが出た時はクリア
+                ClearHover();
+            }
+        }
+
+        // ホバー表示をクリア
+        private void ClearHover()
+        {
+            if (hoveredPiece == null) return;
+
+            hoveredPiece = null;
+            board.HideMoves();
+            GameUIManager.Instance.HidePieceStatus();
         }
     }
 }
