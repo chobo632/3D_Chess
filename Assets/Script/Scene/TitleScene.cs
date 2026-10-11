@@ -1,6 +1,7 @@
+using Chess.Core;
+using Chess.GamePlay;
 using UnityEngine;
 using UnityEngine.UI;
-using Chess.Core;
 
 namespace Chess.Scene
 {
@@ -12,6 +13,11 @@ namespace Chess.Scene
         [SerializeField] private CanvasGroup cameraModePanel;
         // 背景の色を少し暗くする
         [SerializeField] private GameObject darkOverlay;
+
+        private void Start()
+        {
+            BGMManager.Instance?.PlayTitleBGM();
+        }
 
         // 人数選択画面に移行
         public void OnClickPlay()

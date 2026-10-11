@@ -1,7 +1,8 @@
+using Chess.Core;
+using Chess.GamePlay;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Chess.Core;
 
 namespace Chess.Scene
 {
@@ -47,6 +48,8 @@ namespace Chess.Scene
                     resultImageDraw.gameObject.SetActive(true);
                     break;
             }
+
+            BGMManager.Instance?.PlayTitleBGM();
         }
     }
 }

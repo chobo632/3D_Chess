@@ -41,6 +41,10 @@ namespace Chess.GamePlay
 
             if (target != null)
             {
+                // エフェクト再生
+                var worldPos = board.GetWorldPosition(pos);
+                EffectManager.Instance?.PlayCaptureEffect(worldPos);
+
                 board.RemovePiece(pos);
             }
         }

@@ -1,4 +1,5 @@
 using Chess.Core;
+using Chess.GamePlay;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -45,6 +46,10 @@ namespace Chess.Rules
         // 駒の削除（ステータスも同時に削除）
         public void RemovePiece(PieceModel piece, BoardModel boardModel, CellModel cellModel)
         {
+            var pos = cellModel.GetPosition(piece);
+            var worldPos = boardModel.GetWorldPosition(pos);
+            EffectManager.Instance?.PlayCaptureEffect(worldPos);
+
             boardModel.RemovePiece(cellModel.GetPosition(piece));
             stats.Remove(piece);
             kingHealCounter.Remove(piece);

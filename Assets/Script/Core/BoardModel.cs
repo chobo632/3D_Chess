@@ -6,7 +6,9 @@ namespace Chess.Core
 {
     public class BoardModel : MonoBehaviour
     {
-        [SerializeField] GameObject moveMarkerPrefab;
+        [SerializeField] private GameObject moveMarkerPrefab;
+        [SerializeField] private GameObject hoverMarkerPrefab;
+        private readonly List<GameObject> hoverMarkers = new();
 
         // 各駒のプレハブ
         [SerializeField] private PieceView pawnPrefab;
@@ -208,6 +210,27 @@ namespace Chess.Core
             }
 
             moveMarkers.Clear();
+        }
+
+        // ホバー用マーカー表示
+        public void ShowHoverMoves(List<Vector2Int> moves)
+        {
+            HideHoverMoves();
+            foreach (var pos in moves)
+            {
+                var marker = Instantiate(hoverMarkerPrefab, GetWorldPosition(pos), Quaternion.identity);
+                hoverMarkers.Add(marker);
+            }
+        }
+
+        // ホバー用マーカー非表示
+        public void HideHoverMoves()
+        {
+            foreach (var marker in hoverMarkers)
+            {
+                Destroy(marker);
+            }
+            hoverMarkers.Clear();
         }
 
         // 

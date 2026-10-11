@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 512860359662075842}
   - component: {fileID: 7583021900324207120}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: moveMarker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

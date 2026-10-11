@@ -282,7 +282,7 @@ namespace Chess.GamePlay
                 // 新しいホバー表示
                 hoveredPiece = piece;
                 var legalMoves = GameManager.Instance.GetLegalMoves(piece);
-                board.ShowMoves(legalMoves);
+                board.ShowHoverMoves(legalMoves);
 
                 // BattleModeのみステータス表示
                 if (GameManager.Instance.IsBattleMode())
@@ -307,7 +307,7 @@ namespace Chess.GamePlay
             if (hoveredPiece == null) return;
 
             hoveredPiece = null;
-            board.HideMoves();
+            board.HideHoverMoves();
             GameUIManager.Instance.HidePieceStatus();
         }
     }

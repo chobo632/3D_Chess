@@ -4556,7 +4556,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9def4e200e8833446aae74f8394325a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveMarkerPrefab: {fileID: 2206679847690749449, guid: 7b910e54410d5da4fb158fb3d1066ea1, type: 3}
+  moveMarkerPrefab: {fileID: 2206679847690749449, guid: 0af408be21e1422479be587ce74b91fc, type: 3}
+  hoverMarkerPrefab: {fileID: 2650785246648103166, guid: 12686fbd564fb084d81c3e92a6edfe29, type: 3}
   pawnPrefab: {fileID: 2261346069490174833, guid: 837c3fa2cc92d8944b179df9dab48cce, type: 3}
   rookPrefab: {fileID: -2401010746769518278, guid: d7178d2caf9e1614da0dc87add87589f, type: 3}
   knightPrefab: {fileID: 6588943508454598128, guid: 9b8b5a75a36ee634295e504c242a82ce, type: 3}

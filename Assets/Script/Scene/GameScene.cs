@@ -70,6 +70,8 @@ namespace Chess.Scene
             {
                 GameManager.Instance.StartLottery();
             }
+
+            BGMManager.Instance?.PlayGameBGM();
         }
 
         private void Update()
